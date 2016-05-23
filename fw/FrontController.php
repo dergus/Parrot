@@ -17,7 +17,6 @@ class FrontController
 	public  function run()
 	{
 		
-		$r=false;
 		if(isset($_GET['r']) && !empty($_GET['r'])){
 			$r=$_GET['r'];
 
@@ -44,13 +43,13 @@ class FrontController
 
 			$c= new $controller;
 
-			$c->$action();
+			echo $c->$action();
 		}else{
 			$errorController=$this->errorController.'Controller';
 			$errorAction='action'.$this->errorAction();
 
 			if($this->routeExists($controller,$action)){
-				(new $errorController)->$errorAction();
+				echo (new $errorController)->$errorAction();
 			}else{
 				echo "404";
 			}
