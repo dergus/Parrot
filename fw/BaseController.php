@@ -51,4 +51,14 @@ class BaseController
         return strtolower(str_replace('Controller', '', end($class)));
     }
 
+    /**
+     * redirects to the given url
+     * @param  string $url
+     */
+    public function redirect($url)
+    {
+        header('Location: ' . $url);
+        die;
+    }
+
 }
