@@ -3,73 +3,87 @@
 namespace dergus\fw;
 
 /**
-* 
+*
 */
 class FrontController
 {
-	
-	public $defaultController='site';
-	public $defautAction='index';
-	public $controllerDir;
-	public $errorController='site';
-	public $errorAction='error';
 
-	public  function run()
-	{
-		
-		if(isset($_GET['r']) && !empty($_GET['r'])){
-			$r=$_GET['r'];
+    public $cns='\\app\controllers\\';
+    public $defaultController='site';
+    public $defautAction='index';
+    public $controllerDir='controllers';
+    public $errorController='site';
+    public $errorAction='error';
 
-			$routeAr=explode('/', $r);
+    public function __construct()
+    {
+        $this->controllerDir=FW::getConfig()['basePath'].
+                                DIRECTORY_SEPARATOR.
+                                $this->controllerDir;
+    }
 
-			$controller=$routeAr[0];
-			if($isset($routeAr[1])){
-				$action=$routeAr[1];
-			}else{
-				$action=$this->defautAction;
-			}
+    public  function run()
+    {
 
-		}else{
-			$controller=$this->defautController;
-			$action=$this->defautAction;
-		}
+        if(isset($_GET['r']) && !empty($_GET['r'])){
+            $r=$_GET['r'];
 
-		$controller=$controller.'Controller';
-		$action='action'.$action;
+            $routeAr=explode('/', $r);
 
-		$controllerPath=$this->controllerDir.
-		DIRECTORY_SEPARATOR.$controller.'.php';
-		if($this->routeExists($controller,$action)){
+            $controller=$routeAr[0];
+            if(isset($routeAr[1])){
+                $action=$routeAr[1];
+            }else{
+                $action=$this->defautAction;
+            }
 
-			$c= new $controller;
+        }else{
+            $controller=$this->defaultController;
+            $action=$this->defautAction;
+        }
 
-			echo $c->$action();
-		}else{
-			$errorController=$this->errorController.'Controller';
-			$errorAction='action'.$this->errorAction();
-
-			if($this->routeExists($controller,$action)){
-				echo (new $errorController)->$errorAction();
-			}else{
-				echo "404";
-			}
-		}
-	}
-
-	protected function routeExists($controller,$action){
+        $controller=ucfirst($controller.'Controller');
+        $action='action'.ucfirst($action);
 
 
-		$controllerPath=$this->controllerDir.
-		DIRECTORY_SEPARATOR.$controller.'.php';
+        if($this->routeExists($controller,$action)){
 
-		if(file_exists($controllerPath)){
+            $cname= $this->cns.$controller;
+            $c= new $cname;
 
-			require_once($controllerPath);
+            echo $c->$action();
+        }else{
+            $errorController=ucfirst($this->errorController).'Controller';
+            $errorAction='action'.$this->errorAction;
 
-			if(method_exists($controllerPath,$action))
-				return true;
-		}
+            if($this->routeExists($errorController,$errorAction)){
 
-		return false;
-	}
+                    $cname= $this->cns.$errorController;
+                    $c= new $cname;
+
+                    echo $c->$errorAction();
+            }else{
+                echo "404";
+            }
+        }
+    }
+
+    protected function routeExists($controller,$action){
+
+
+        $controllerPath=$this->controllerDir.
+        DIRECTORY_SEPARATOR.$controller.'.php';
+
+        // echo $controllerPath.'::'.$action.' | ';
+        if(file_exists($controllerPath)){
+
+            require_once($controllerPath);
+            if(method_exists($this->cns."SiteController",$action)){
+                // echo "ww";
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
